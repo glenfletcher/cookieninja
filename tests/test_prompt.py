@@ -541,11 +541,10 @@ class TestParseQuestionExpression(object):
     ):
         """Verify successful parses of question."""
         env = environment.StrictEnvironment()
-        context = {"cookiecutter": cookiecutter_dict}
         assert (
             actual_key,
             should_present_question,
-        ) == prompt.parse_question_expression(context, env, key)
+        ) == prompt.parse_question_expression(env, key, cookiecutter_dict)
 
     @pytest.mark.parametrize(
         "cookiecutter_dict, key, actual_key, should_present_question",
@@ -571,4 +570,4 @@ class TestParseQuestionExpression(object):
         env = environment.StrictEnvironment()
         context = None
         with pytest.raises(exceptions.InvalidBooleanExpression):
-            prompt.parse_question_expression(context, env, key)
+            prompt.parse_question_expression(env, key, context)

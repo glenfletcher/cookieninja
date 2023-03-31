@@ -218,7 +218,7 @@ def prompt_for_config(context, no_input=False):
 
         if "?" in key:
             actual_key, should_present_question = parse_question_expression(
-                context, env, key
+                env, key, cookiecutter_dict
             )
             key = actual_key
             if not should_present_question:
@@ -265,18 +265,23 @@ def prompt_for_config(context, no_input=False):
     return cookiecutter_dict
 
 
-def parse_question_expression(context, env, key):
+def parse_question_expression(env, key, cookiecutter_dict):
     """Parse the question that the user entered.
 
-    :param context: Source for field names and sample values.
     :param env: A Jinja2 Environment object.
     :param key: The key of the prompt variable.
+    :param dict cookiecutter_dict: The current context as it's gradually
+        being populated with variables.
     """
     try:
         actual_key, dependant_variable = key.split("?")
-        boolean_expression = env.from_string(dependant_variable).render(**context)
+        boolean_expression = env.from_string(dependant_variable).render(
+            cookiecutter=cookiecutter_dict
+        )
         should_present_question = boolean_expression == "True"
     except Exception as err:
         msg = f"Unable to render dependent question - {key}"
-        raise InvalidBooleanExpression(msg, err, context) from err
+        raise InvalidBooleanExpression(
+            msg, err, {"cookiecutter": cookiecutter_dict}
+        ) from err
     return actual_key, should_present_question
